@@ -1,0 +1,7 @@
+{
+  "checks": [
+    { "name": "Frontend", "url": "https://research360.ethikslabs.com" },
+    { "name": "API",      "url": "https://research360.ethikslabs.com/api/health" }
+  ],
+  "ssl": ["research360.ethikslabs.com"]
+}

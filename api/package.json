@@ -1,0 +1,32 @@
+{
+  "name": "jp-system-dashboard-api",
+  "version": "1.0.0",
+  "description": "Backend API for the jp-system Founder SIEM dashboard",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "jest --forceExit --detectOpenHandles"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "bullmq": "^5.34.0",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "ioredis": "^5.4.2",
+    "pg": "^8.13.1",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "fast-check": "^3.23.2",
+    "ioredis-mock": "^8.9.0",
+    "jest": "^29.7.0",
+    "pg-mem": "^3.0.6"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": [
+      "**/tests/**/*.test.js",
+      "**/tests/**/*.property.js"
+    ]
+  }
+}

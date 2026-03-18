@@ -1,0 +1,6 @@
+{
+  "checks": [
+    { "name": "Platform", "url": "https://platform.ethikslabs.com/hx/contacts/" }
+  ],
+  "ssl": ["platform.ethikslabs.com"]
+}
