@@ -1,0 +1,59 @@
+/* LeftNav.css */
+.leftnav {
+  width: 220px;
+  min-width: 220px;
+  height: 100%;
+  overflow-y: auto;
+  border-right: 1px solid var(--border);
+  padding: 20px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.leftnav__section-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  padding: 0 16px;
+  margin-bottom: 4px;
+}
+
+.leftnav__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 36px;
+  padding: 0 16px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text);
+  border-left: 2px solid transparent;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.leftnav__item:hover {
+  background: var(--bg2);
+}
+
+.leftnav__item.active {
+  border-left-color: var(--accent-e);
+  background: rgba(200,169,110,0.04);
+}
+
+.leftnav__badge {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(200,169,110,0.12);
+  color: var(--accent-e);
+}
+
+.leftnav__badge--blocker {
+  background: rgba(196,122,122,0.12);
+  color: var(--accent-t);
+}
