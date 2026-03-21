@@ -1,0 +1,61 @@
+/* ── Tokens ─────────────────────────────────────────────────────────────── */
+:root {
+  --bg:       #0e0e0e;
+  --bg2:      #151515;
+  --bg3:      #1c1c1c;
+  --bg4:      #222;
+  --bg5:      #282828;
+  --border:   rgba(255,255,255,0.07);
+  --border2:  rgba(255,255,255,0.13);
+  --text:     #e8e6e0;
+  --muted:    #6b6b6b;
+  --faint:    #2a2a2a;
+  --accent-e: #c8a96e;
+  --accent-s: #8fb8a0;
+  --accent-l: #7ba3c4;
+  --accent-r: #b08ad4;
+  --accent-t: #c47a7a;
+  --green:    #5a9e6f;
+}
+
+/* ── Reset ───────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  height: 100vh;
+  overflow: hidden;
+}
+
+#root { height: 100vh; display: flex; flex-direction: column; }
+
+/* ── Typography helpers ──────────────────────────────────────────────────── */
+.serif    { font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; }
+.mono     { font-family: 'DM Mono', monospace; }
+.muted    { color: var(--muted); }
+
+/* ── Scrollbar ───────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--faint); border-radius: 2px; }
+
+/* ── Keyframes ───────────────────────────────────────────────────────────── */
+@keyframes live-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.35; transform: scale(0.75); }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 12px rgba(196,122,122,0.2); }
+  50%       { box-shadow: 0 0 22px rgba(196,122,122,0.5); }
+}
+
+@keyframes bar-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
