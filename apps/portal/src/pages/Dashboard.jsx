@@ -2,6 +2,8 @@
 import { LeftNav } from '../components/LeftNav/LeftNav'
 import { RightPanel } from '../components/RightPanel/RightPanel'
 import { EdisonView } from '../components/dashboard/views/EdisonView'
+import { SophiaView } from '../components/dashboard/views/SophiaView'
+import { LeonardoView } from '../components/dashboard/views/LeonardoView'
 import { usePersona } from '../contexts/PersonaContext'
 
 export function Dashboard() {
@@ -11,7 +13,8 @@ export function Dashboard() {
       <LeftNav />
       <main style={{ flex: 1, overflow: 'auto', padding: '28px 32px' }}>
         {persona === 'edison' && <EdisonView />}
-        {persona !== 'edison' && <div style={{ color: 'var(--muted)', fontFamily: 'DM Mono', fontSize: '11px' }}>{persona} view — coming in next task</div>}
+        {persona === 'sophia' && <SophiaView />}
+        {persona === 'leonardo' && <LeonardoView />}
       </main>
       <RightPanel />
     </div>
