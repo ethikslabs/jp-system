@@ -200,8 +200,13 @@ export function Dashboard() {
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         gap: '1rem',
       }}>
-        <div style={{ color: 'var(--text-muted)', fontSize: '0.625rem', letterSpacing: '0.25em', textTransform: 'uppercase', flexShrink: 0 }}>
-          JP-SYSTEM
+        <div style={{
+          fontFamily: "'Cormorant Garamond', serif",
+          fontSize: '1.1rem', fontWeight: '300',
+          color: 'var(--teal)', letterSpacing: '0.04em',
+          flexShrink: 0,
+        }}>
+          EthiksLabs
         </div>
         <LensSwitcher active={lens} onChange={setLens} />
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
