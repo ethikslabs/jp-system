@@ -64,13 +64,19 @@ Nothing moves to `authorised` or `live` without John explicitly confirming it.
 
 Live status for each project is tracked in `/projects/`:
 - `projects/proof360.md`
+- `projects/proof360-founder-experience.md` — locked founder experience principle (v1.0)
+- `projects/proof360-principle.md` — locked product principle
 - `projects/research360.md`
 - `projects/signal360.md`
 - `projects/civique.md`
 
 Update these at the end of any session where meaningful progress was made.
 
+**Project Room files** — `projects/*-room.md` (e.g. `proof360-room.md`, `research360-room.md`) are structured data files powering the "Project Room" views in the portal. They contain identity, problem, solution, stack, traction, and graduation criteria per project. Update when meaningful facts change. Do not confuse with the parent `projects/<name>.md` status files — both coexist.
+
 ## Startup — always do this first
+
+`AGENTS.md` at the repo root governs agent operating rules, handoff protocol, and role responsibilities. CLAUDE.md is the detail layer.
 
 Before any work, read in order:
 1. `/projects/<relevant-project>.md` — current status and next actions
@@ -92,14 +98,13 @@ If the task spans multiple phases, reread `/ai/CURRENT_TASK.md` before each phas
 
 ## Current Project Focus
 
-The current setup in this repo is tailored to **Proof360**.
+The current focus is the **jp-system Founder SIEM dashboard** — John's personal operating dashboard showing real-time signals across all EthiksLabs projects.
 
-- **Product:** Proof360 converts messy operating evidence into structured trust output for vendors and partners.
-- **Pipeline:** `input → signals → inference → corrections → context → gaps → Trust360 → score → vendors → report`
-- **Stack:** Fastify API + Vite/React frontend + Trust360 (external reasoning engine)
-- **Key boundary:** Trust360 is external. Proof360 prepares structured inputs for it and consumes outputs. Never cross that boundary implicitly.
-
-Treat this as the current project context, not a statement that `jp-system` is itself the Proof360 product repo.
+- **Frontend:** React + Vite, localhost:5174, `dashboard/src/`
+- **API:** Express + Postgres + Redis + BullMQ, localhost:3001, `api/`
+- **Model:** pulse → BPM → lens → layout spec → component grid
+- **Status:** v1.0 running locally. Smoke test passed 2026-03-20.
+- **Active task:** See `/ai/CURRENT_TASK.md`
 
 ## Execution rules
 
@@ -123,41 +128,118 @@ When implementation begins for a specific product, follow that product's archite
 
 ## What is actually in this repo
 
-### `dashboard/` — Founder SIEM v0 prototype
+### `dashboard/` — Founder SIEM v1.0
 
-Working React/Vite prototype. Uses SSE for real-time updates.
-
-```
-dashboard/src/App.jsx           — main app, SSE client, project grid
-dashboard/src/components/       — ProjectCard, ProjectDetail
-dashboard/vite.config.js        — proxies /api to http://localhost:3333
-```
+Production React + Vite frontend. Pulse/BPM/lens model. Built against `docs/brief-dashboard-frontend.md`.
 
 **To run:**
 ```bash
-cd dashboard && npm run dev      # frontend on localhost:5199 (or Vite default)
-# Fastify backend must be running on port 3333 (not in this repo)
+cd dashboard && npm run dev      # frontend on localhost:5174
+# API must be running (api/ — requires Postgres + Redis, see below)
 ```
 
-**Note:** Dashboard v0 is a working prototype. The production Founder SIEM (v1.0) is being built against `docs/brief-dashboard-api.md` with a different stack (Node.js + Express + Postgres + Redis + BullMQ). Dashboard v0 can be referenced for health check polling and SSE patterns.
+**Key files:**
+```
+dashboard/src/App.jsx                     — screen router (onboarding → dashboard)
+dashboard/src/screens/Onboarding.jsx      — max heart rate input on first load
+dashboard/src/screens/Dashboard.jsx       — heart + lens switcher + component grid
+dashboard/src/components/Heart.jsx        — beating heart, zone colour, Framer Motion
+dashboard/src/components/lens/            — LensSwitcher (Founder/CISO/Investor/Board)
+dashboard/src/components/library/         — all 12 registered components
+dashboard/src/hooks/useBPM.js             — polls GET /bpm every 1s
+dashboard/src/hooks/useLayout.js          — fetches POST /layout on lens change
+dashboard/src/services/api.js             — all API calls (base URL: VITE_API_URL)
+```
 
-### Dashboard v1.0 architecture (from `docs/brief-dashboard-api.md`)
-
-The production dashboard uses a **pulse/BPM/lens model**:
-
-- **Pulses** — immutable structured events (`POST /pulses`), 300s deduplication window
-- **BPM** — computed on a 1s tick from pulse count in a rolling window; 5 zones based on `current/max` ratio
-- **Layout spec** — Claude API (Sonnet) generates a component grid JSON for the active lens (`POST /layout`)
-- **Lenses** — `founder | ciso | investor | board` — each produces a different component selection
-
-Registered component library (validation list — Claude must only return these):
+**Registered component library (validated at both API and frontend):**
 ```
 MetricCard, StatusGrid, AlertFeed, HealthBar, ActivitySparkline,
 PeopleCard, GapCard, LifecycleBoard, BPMChart, SecretRotation,
 CostTracker, PipelineMetric
 ```
 
-Stack: Node.js + Express, Postgres (pulse store), Redis (BPM tick + dedup), BullMQ (1s tick), Claude API (Sonnet).
+Unknown components returned by the layout API show an `ErrorCard` — never silently skipped. The canonical validation list lives in `api/src/config/components.js`; the frontend `COMPONENT_REGISTRY` in `dashboard/src/screens/Dashboard.jsx` must stay in sync.
+
+### `api/` — Dashboard API v1.0
+
+Node.js + Express backend. Stack: Postgres (pulse store), Redis (BPM snapshot + dedup), BullMQ (1s tick), Claude API (Sonnet).
+
+**To run (full stack):**
+```bash
+# Terminal 1 — ngrok (required for GitHub webhooks)
+ngrok http --url=higher-baculine-andree.ngrok-free.dev 3001
+
+# Terminal 2 — API
+cd api && node index.js
+
+# Terminal 3 — Frontend
+cd dashboard && npm run dev
+
+# Terminal 4 — Proof360 (optional, for cross-product pulses)
+cd ~/Library/CloudStorage/Dropbox/Projects/proof360/api && node server.js
+```
+
+**Test:**
+```bash
+cd api && npm test                                          # all tests (jest)
+cd api && npx jest tests/path/to/file.js                  # single test file
+cd api && npx jest tests/property/lens-config.property.js # property tests (fast-check)
+```
+
+**First-time setup:**
+```bash
+# 1. Create api/.env (see required vars below)
+# 2. Apply schema:
+psql $PGDATABASE -f api/src/db/schema.sql
+# 3. Start Redis
+# 4. node index.js
+```
+
+**Required `api/.env` vars:**
+```
+PORT=3001
+DATABASE_URL=postgres://...
+REDIS_URL=redis://localhost:6379
+ANTHROPIC_API_KEY=sk-ant-...
+GITHUB_WEBHOOK_SECRET=...        # must match GitHub webhook config
+ENABLE_SIMULATOR=true            # set false to disable synthetic pulses
+```
+
+**AWS credentials** — uses default SDK credential chain (IAM role / `~/.aws/credentials`). The Cloudflare API token is read from SSM at `/cloudflare/api-token` — no `.env` entry needed.
+
+**API routes:**
+```
+POST /pulses           — ingest a pulse (300s dedup window by source+type+entity_id)
+GET  /bpm              — current BPM snapshot from Redis
+POST /layout           — { lens_id } → component grid JSON (30s Redis cache, 2 Claude attempts)
+GET  /onboarding       — get max_bpm setting
+POST /onboarding       — set max_bpm, writes to DB + Redis bpm:max
+POST /webhooks/github  — GitHub events → pulses (HMAC-SHA256 verified; push, pull_request, deployment_status, issues)
+GET  /actions          — recent pulses as human-readable action labels (used by CISO lens)
+```
+
+**Architecture — pulse/BPM/lens model:**
+- **Pulses** — immutable structured events, schema defined in `api/src/db/schema.sql`
+- **BPM** — BullMQ worker fires every 1s, counts pulses in 60s rolling window, writes snapshot to Redis hash `bpm:current`. Zone 1–5 based on `current/max` ratio (50/65/75/90% thresholds).
+- **Layout** — `POST /layout` triggers `layout-engine.js`: checks pulse count, reads Redis cache, calls Claude API (model: `claude-sonnet-4-20250514`), validates response (3 steps: JSON parse → schema → component library check), caches 30s. Falls back to `AlertFeed` if zero pulses.
+- **Simulator** — `pulse-simulator.js` runs in-process and fires synthetic pulses so BPM is never empty in dev. Disable with `ENABLE_SIMULATOR=false`.
+
+**Background pollers (all start automatically with `node index.js`):**
+- **AWS poller** (`aws-poller.js`) — EC2 instance health (60s), CloudWatch CPU (60s), Cost Explorer monthly (1hr); region `ap-southeast-2`
+- **Compliance poller** (`compliance-poller.js`) — open security groups (10min), unencrypted EBS (1hr), GuardDuty findings (5min), IAM users without MFA (1hr)
+- **Cloudflare poller** (`cloudflare-poller.js`) — zone analytics (5min), SSL certificate status (1hr); token from SSM `/cloudflare/api-token`
+
+**Proof360 pulse emitter** — `proof360/api/src/services/pulse-emitter.js` fires pulses on assessment lifecycle events (started, submitted, report_generated, lead_captured, pipeline_timeout). Fire-and-forget — Proof360 is unaffected if the dashboard API is down. Requires `DASHBOARD_API_URL=http://localhost:3001` in proof360's `.env`.
+
+### `.kiro/specs/dashboard-api/` — formal API spec (produced by Kiro)
+
+| File | Purpose |
+|------|---------|
+| `requirements.md` | Full requirements list (numbered, traceable) |
+| `design.md` | Design decisions and interface contracts |
+| `tasks.md` | Task decomposition — implementation checklist |
+
+These are the authoritative spec artefacts. Cross-reference against `docs/brief-dashboard-api.md` if anything conflicts.
 
 ### `docs/` — build briefs and session records
 
@@ -172,7 +254,7 @@ Stack: Node.js + Express, Postgres (pulse store), Redis (BPM tick + dedup), Bull
 | `brief-dashboard-frontend.md` | Frontend build brief for Claude Code |
 | `requirements-dashboard-api.md` | Kiro's requirements doc (reviewed + approved) |
 | `audience-views.md` | Lens/audience view definitions |
-| `session-2026-03-18.md` | Session record |
+| `archive/` | Retired session records and superseded protocol files |
 
 ### `health/` — project health check state
 
@@ -203,3 +285,8 @@ ethikslabs.com → Cloudflare (proxied) → AWS EC2 ap-southeast-2 (54.252.185.1
 - Repo: `github.com/ethikslabs/ethikslabs-core`
 - Backend started manually: `node server.mjs`
 - Voice pipeline: AWS Transcribe (STT) → AWS Bedrock Claude 3.5 Sonnet (LLM) → Amazon Polly (TTS)
+
+**EC2 access: SSM only — not SSH. Port 22 is not open.**
+```bash
+aws ssm start-session --target <instance-id> --region ap-southeast-2
+```

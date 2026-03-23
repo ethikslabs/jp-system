@@ -106,7 +106,11 @@ async function getCurrentBPM(redis) {
  * @returns {{ queue: Queue, worker: Worker }}
  */
 function setupBPMTicker({ redis, pool, windowSeconds = DEFAULT_WINDOW_SECONDS } = {}) {
-  const connection = redis;
+  // BullMQ requires its own connection with maxRetriesPerRequest: null
+  const Redis = require('ioredis');
+  const connection = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
+    maxRetriesPerRequest: null,
+  });
 
   const queue = new Queue('bpm-tick', { connection });
 
@@ -123,7 +127,7 @@ function setupBPMTicker({ redis, pool, windowSeconds = DEFAULT_WINDOW_SECONDS } 
     { connection, concurrency: 1 }
   );
 
-  return { queue, worker };
+  return { queue, worker, connection };
 }
 
 module.exports = {

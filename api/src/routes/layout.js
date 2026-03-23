@@ -14,7 +14,7 @@ router.post('/', async (req, res) => {
     if (!lens_id) {
       return res.status(400).json({
         error: 'invalid_lens_id',
-        valid: ['founder', 'ciso', 'investor', 'board'],
+        valid: ['founder', 'ciso', 'investor', 'board', 'sarvesh', 'val'],
       });
     }
 
@@ -25,7 +25,7 @@ router.post('/', async (req, res) => {
       if (err.reason === 'invalid_lens_id') {
         return res.status(400).json({
           error: 'invalid_lens_id',
-          valid: ['founder', 'ciso', 'investor', 'board'],
+          valid: ['founder', 'ciso', 'investor', 'board', 'sarvesh', 'val'],
         });
       }
       if (err.reason === 'invalid_response') {

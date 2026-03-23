@@ -38,7 +38,7 @@ export function Onboarding({ onComplete }) {
       }}
     >
       <div style={{ color: 'var(--text-muted)', fontSize: '0.875rem', letterSpacing: '0.2em', textTransform: 'uppercase' }}>
-        jp-system
+        EthiksLabs
       </div>
 
       <div style={{ color: 'var(--text)', fontSize: '1.5rem', fontWeight: '600' }}>

@@ -6,8 +6,9 @@ import { Dashboard } from './pages/Dashboard'
 import { EngineView } from './pages/EngineView'
 
 export default function App() {
-  const { isLoading, isAuthenticated, loginWithRedirect } = useAuth0()
+  const { isLoading, isAuthenticated, loginWithRedirect, error } = useAuth0()
   if (isLoading) return <div style={{ color: 'var(--muted)', padding: '2rem', fontFamily: 'DM Mono', fontSize: '11px' }}>Authenticating…</div>
+  if (error) return <div style={{ color: 'var(--accent-t)', padding: '2rem', fontFamily: 'DM Mono', fontSize: '11px' }}>{error.message}<br/><br/><span style={{ cursor: 'pointer', textDecoration: 'underline' }} onClick={() => loginWithRedirect()}>Retry</span></div>
   if (!isAuthenticated) { loginWithRedirect(); return null }
   return (
     <PersonaProvider>

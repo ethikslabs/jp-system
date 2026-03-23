@@ -59,3 +59,62 @@ body {
   0%, 100% { opacity: 1; }
   50%       { opacity: 0.4; }
 }
+
+/* ── Component library token aliases (bridges dashboard/ → portal/) ──── */
+:root {
+  --bg-card:    var(--bg2);
+  --bg-surface: var(--bg3);
+  --text-muted: var(--muted);
+  --text-dim:   var(--faint);
+
+  /* Compass (CISO) and Meridian (Board) persona accents */
+  --accent-c: rgba(251, 191, 36, 1);
+  --accent-m: rgba(96, 165, 250, 1);
+}
+
+/* ── Component card classes (used by the 12-component library) ───────── */
+.card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.card-title {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.card-value {
+  color: var(--text);
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* ── Keyframes ───────────────────────────────────────────────────────── */
+@keyframes heartbeat {
+  0%   { transform: scale(1); }
+  12%  { transform: scale(1.18); }
+  24%  { transform: scale(1); }
+  36%  { transform: scale(1.09); }
+  55%  { transform: scale(1); }
+  100% { transform: scale(1); }
+}
+
+@keyframes skeleton-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}

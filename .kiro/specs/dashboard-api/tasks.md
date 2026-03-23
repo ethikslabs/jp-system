@@ -34,7 +34,7 @@ Build the jp-system Founder SIEM dashboard backend in logical dependency order: 
     - Export `getLens(lensId)` helper that returns the definition or null
     - _Requirements: 5.1, 5.4_
 
-  - [ ]* 2.3 Write property test for lens config — Property 14
+  - [x]* 2.3 Write property test for lens config — Property 14
     - **Property 14: Lens definitions contain all required fields**
     - Test file: `api/tests/property/lens-config.property.js`
     - For each lens in config, verify all required fields are present and correctly typed
@@ -79,7 +79,7 @@ Build the jp-system Founder SIEM dashboard backend in logical dependency order: 
     - Use fast-check to generate random pulse objects with missing/invalid fields, unsupported schema versions, duplicate (id, source) pairs, and valid pulses for round-trip verification
     - **Validates: Requirements 1.1, 1.2, 1.3, 1.4, 1.5, 1.7**
 
-  - [ ]* 4.4 Write unit tests for pulse ingester
+  - [~]* 4.4 Write unit tests for pulse ingester
     - Test file: `api/tests/unit/pulse-ingester.test.js`
     - Test specific examples: valid pulse stored, duplicate rejected, invalid schema version rejected, missing fields rejected, out-of-order timestamp accepted
     - Mock Postgres with `pg-mem`, mock Redis with `ioredis-mock`
@@ -106,7 +106,7 @@ Build the jp-system Founder SIEM dashboard backend in logical dependency order: 
     - Return 503 with `{ "error": "bpm_unavailable" }` if Redis has no BPM data
     - _Requirements: 2.6_
 
-  - [ ]* 6.3 Write property tests for BPM computation — Properties 5, 6, 7
+  - [~]* 6.3 Write property tests for BPM computation — Properties 5, 6, 7
     - **Property 5: BPM formula correctness**
     - **Property 6: Pulse ordering within window**
     - **Property 7: Zone calculation from BPM percentage**
@@ -115,7 +115,7 @@ Build the jp-system Founder SIEM dashboard backend in logical dependency order: 
     - Verify BPM formula, sort order, and zone threshold mapping
     - **Validates: Requirements 2.2, 2.4, 2.5, 3.1**
 
-  - [ ]* 6.4 Write unit tests for BPM ticker and zone calculation
+  - [~]* 6.4 Write unit tests for BPM ticker and zone calculation
     - Test files: `api/tests/unit/bpm-ticker.test.js`, `api/tests/unit/zone-calculation.test.js`
     - Test edge cases: zero pulses returns BPM 1, zone boundaries (exact 50%, 65%, 75%, 90%), default max_bpm 60
     - Mock Postgres and Redis
@@ -128,13 +128,13 @@ Build the jp-system Founder SIEM dashboard backend in logical dependency order: 
     - Map validation errors → 400, storage errors → 500
     - _Requirements: 6.1, 6.2, 6.3, 6.4_
 
-  - [ ]* 7.2 Write property test for onboarding — Property 8
+  - [~]* 7.2 Write property test for onboarding — Property 8
     - **Property 8: Onboarding max_bpm round trip and zone recalibration**
     - Test file: `api/tests/property/onboarding.property.js`
     - Use fast-check to generate random positive integers, post then verify GET returns same value and zone recalculation uses new max_bpm
     - **Validates: Requirements 3.3, 6.2**
 
-  - [ ]* 7.3 Write unit tests for onboarding
+  - [~]* 7.3 Write unit tests for onboarding
     - Test file: `api/tests/unit/onboarding.test.js`
     - Test: valid max_bpm stored, invalid max_bpm rejected (zero, negative, non-integer, missing), GET returns default when not configured
     - _Requirements: 6.1, 6.2, 6.3, 6.4_
@@ -160,7 +160,7 @@ Build the jp-system Founder SIEM dashboard backend in logical dependency order: 
     - Map invalid lens → 400, LayoutError → 502
     - _Requirements: 4.1_
 
-  - [ ]* 8.3 Write property tests for layout validation — Properties 9, 10, 11
+  - [~]* 8.3 Write property tests for layout validation — Properties 9, 10, 11
     - **Property 9: Layout validation rejects invalid specs**
     - **Property 10: Layout validation retries once then errors**
     - **Property 11: Claude API payload contains all required fields**
@@ -168,14 +168,14 @@ Build the jp-system Founder SIEM dashboard backend in logical dependency order: 
     - Use fast-check to generate random invalid JSON, missing fields, unknown components; mock Claude API
     - **Validates: Requirements 4.5, 4.6, 4.7, 4.8, 4.9, 4.10, 4.2, 4.3**
 
-  - [ ]* 8.4 Write property tests for layout caching — Properties 12, 13
+  - [~]* 8.4 Write property tests for layout caching — Properties 12, 13
     - **Property 12: Lens cache invalidation on switch**
     - **Property 13: Same-lens cache TTL**
     - Test file: `api/tests/property/layout-caching.property.js`
     - Use fast-check to generate random lens_id sequences, verify cache miss on lens change and cache hit within 30s
     - **Validates: Requirements 5.2, 5.3**
 
-  - [ ]* 8.5 Write unit tests for layout engine
+  - [~]* 8.5 Write unit tests for layout engine
     - Test file: `api/tests/unit/layout-engine.test.js`
     - Test: valid layout returned, empty stream returns AlertFeed fallback, invalid Claude response triggers retry, retry failure returns 502, cache hit skips Claude call, lens switch invalidates cache
     - Mock Claude API, Postgres, Redis
@@ -201,7 +201,7 @@ Build the jp-system Founder SIEM dashboard backend in logical dependency order: 
     - Route generated pulses through `pulse-ingester.ingestPulse()` so they pass the same validation pipeline
     - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5, 7.6, 7.7, 7.8, 7.9, 7.10, 7.11_
 
-  - [ ]* 10.2 Write property test for simulator — Property 15
+  - [~]* 10.2 Write property test for simulator — Property 15
     - **Property 15: Simulated pulses conform to canonical schema and source types**
     - Test file: `api/tests/property/simulator.property.js`
     - Use fast-check to generate many simulated pulses, validate each against canonical schema and verify source-appropriate types
@@ -218,7 +218,7 @@ Build the jp-system Founder SIEM dashboard backend in logical dependency order: 
     - Add global error handler returning JSON errors
     - _Requirements: 8.1, 8.4, 8.6, 8.7, 8.8, 8.9_
 
-  - [ ]* 11.2 Write integration tests
+  - [~]* 11.2 Write integration tests
     - Test files: `api/tests/integration/pulse-flow.test.js`, `api/tests/integration/onboarding-flow.test.js`
     - `pulse-flow.test.js`: End-to-end ingest → BPM computation → layout generation
     - `onboarding-flow.test.js`: Onboarding → zone recalibration → BPM reflects new max

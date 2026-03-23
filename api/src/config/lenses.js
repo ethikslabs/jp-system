@@ -38,6 +38,22 @@ const LENSES = {
     source_weights: { github: 1, stripe: 1, auth0: 1, hubspot: 1, proof360: 1, system: 1, aws: 1 },
     max_components: 4,
   },
+  sarvesh: {
+    id: 'sarvesh',
+    label: 'Sarvesh',
+    prompt_context: 'CTO of Ethiks360. This is John\'s lab — jp-system is where things are built and tested before graduating to Ethiks360. Sarvesh needs to know: what is in the lab right now, what is close to graduating (validated/authorised state), what has already graduated (live), and whether the infrastructure supporting it is healthy. Show build velocity, lifecycle state of all projects, deployment activity, server health, pipeline performance. Technical depth — specifics not summaries. Flag anything that is validated or authorised as ready for handoff conversation.',
+    severity_weights: { info: 1, warning: 1, critical: 1 },
+    source_weights: { github: 1, stripe: 0, auth0: 1, hubspot: 0, proof360: 1, system: 1, aws: 1 },
+    max_components: 6,
+  },
+  val: {
+    id: 'val',
+    label: 'Val',
+    prompt_context: 'COO of Ethiks360. This is John\'s lab — jp-system is where things are tested before they become Ethiks360 products. Val needs to know: what has graduated or is graduating (validated/authorised/live projects), operational health of what is running, compliance gaps that need addressing before anything goes to market, cost, and who is active. Operational framing — what is ready to run, what still needs work, what needs Val\'s attention. No deep technical detail. Flag anything approaching market-ready.',
+    severity_weights: { info: 1, warning: 1, critical: 1 },
+    source_weights: { github: 0, stripe: 1, auth0: 1, hubspot: 1, proof360: 1, system: 1, aws: 1 },
+    max_components: 5,
+  },
 };
 
 function getLens(lensId) {

@@ -37,10 +37,11 @@ function getClient() {
  * @returns {{ valid: boolean, spec: object|null, step: number|null }}
  */
 function validateLayoutSpec(responseText) {
-  // Step 1: JSON parse
+  // Step 1: JSON parse — strip markdown fences if present
   let spec;
   try {
-    spec = JSON.parse(responseText);
+    const cleaned = responseText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '').trim();
+    spec = JSON.parse(cleaned);
   } catch {
     return { valid: false, spec: null, step: 1 };
   }
@@ -68,11 +69,46 @@ function validateLayoutSpec(responseText) {
 // --- System prompt (exact from design doc) ---
 
 const SYSTEM_PROMPT =
-  'You are a dashboard layout engine. You receive a pulse stream and a lens definition. ' +
-  'You return a JSON layout spec selecting components from the provided library. ' +
+  'You are a dashboard layout engine for a Founder SIEM — a real-time operating dashboard. ' +
+  'You receive a pulse stream and a lens definition. ' +
+  'You return a JSON layout spec using ALL components from the provided library. ' +
+  'IMPORTANT: You must include every single component in available_components in the layout array. ' +
+  'All 12 components must appear. Order them by relevance to the lens and pulse data — most important first. ' +
+  'Populate each component with real data extracted from the pulse stream. ' +
+  'Use specific numbers, names, and values from the pulses — never use placeholder text. ' +
+
+  // Language rules
+  'LANGUAGE: Write for a founder, not an AWS console. ' +
+  'Say "servers" not "fleet" or "EC2 instances". ' +
+  'Say "your servers" not "EC2 Instance Health Overview". ' +
+  'Say "CPU" not "EC2 CPU Utilisation — Active Instances". ' +
+  'Say "Server Alerts" not "Critical EC2 Health Alerts". ' +
+  'Say "Infrastructure Gap" not "Fleet Coverage Gap". ' +
+  'Never use the word "fleet" or "Fleet". ' +
+
+  // EC2 naming
+  'For EC2 pulses, use payload.name (the human-readable name) not payload.instance_id. ' +
+  'When summarising multiple similar items, group them: "7 servers stopped" not individual IDs. ' +
+
+  // AlertFeed format
+  'AlertFeed alerts must include: source, severity, message, timestamp, and entity_id fields. ' +
+  'entity_id is the repo name for github pulses, instance name for aws pulses. ' +
+
+  // CostTracker
+  'CostTracker: ONLY use pulses with source="aws" and tags including "cost". ' +
+  'If no aws/cost pulses exist, omit the data field entirely — do not invent cost figures. ' +
+  'When cost data exists, data must be an array of { source: string, spend: number } objects. ' +
+  'ActivitySparkline for CPU: include current (latest value), unit="%", threshold=80, showYAxis=true, ' +
+  'and points as array of {hour, value} from cpu_utilization pulses. ' +
+
   'You never invent new components. You never return HTML. You never return prose. ' +
-  'The summary field is one sentence maximum. Select components that matter most for ' +
-  'this lens and audience. Return valid JSON only.';
+  'You never wrap your response in markdown fences or backticks. ' +
+  'The summary field is one sentence, max 80 characters — name specific signals, not generalities. ' +
+  'You must return ONLY a raw JSON object with exactly these fields: ' +
+  '"lens" (string), "bpm_zone" (number), "summary" (string), "layout" (array of 12 items). ' +
+  'Each layout item must have a "component" field matching one of the available_components, ' +
+  'plus a "title" field and any data fields the component uses. ' +
+  'No other top-level fields. No prose. No markdown. Raw JSON only.';
 
 // --- Main layout generation ---
 
@@ -117,9 +153,11 @@ async function generateLayout(lensId, { pool, redis }) {
 
   // 4. Lens definition already loaded in step 1
 
-  // 5. Fetch recent pulses
+  // 5. Fetch recent pulses — cap at 50 most recent to keep payload manageable
   const pulsesResult = await pool.query(
-    `SELECT * FROM pulses WHERE timestamp >= NOW() - interval '60 seconds' ORDER BY timestamp ASC, id ASC`
+    `SELECT id, timestamp, source, type, entity_type, entity_id, severity, payload, tags
+     FROM pulses WHERE timestamp >= NOW() - interval '60 seconds'
+     ORDER BY timestamp DESC, id DESC LIMIT 50`
   );
   const recentPulses = pulsesResult.rows;
 
@@ -143,18 +181,31 @@ async function generateLayout(lensId, { pool, redis }) {
   let lastStep = null;
 
   for (let attempt = 0; attempt < 2; attempt++) {
-    const response = await client.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1024,
-      system: SYSTEM_PROMPT,
-      messages: [{ role: 'user', content: JSON.stringify(payload) }],
-    });
+    let response;
+    try {
+      const timeout = new Promise((_, reject) =>
+        setTimeout(() => reject(new LayoutError('timeout')), 60000)
+      );
+      response = await Promise.race([
+        client.messages.create({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 4096,
+          system: SYSTEM_PROMPT,
+          messages: [{ role: 'user', content: JSON.stringify(payload) }],
+        }),
+        timeout,
+      ]);
+    } catch (err) {
+      console.error(`[layout-engine] Claude API error (attempt ${attempt + 1}): ${err.message}${err.status ? ` | status: ${err.status}` : ''}`);
+      throw err;
+    }
 
     const responseText =
       response.content && response.content[0] && response.content[0].text
         ? response.content[0].text
         : '';
 
+    console.log(`[layout-engine] Claude response (attempt ${attempt + 1}):`, responseText);
     const result = validateLayoutSpec(responseText);
 
     if (result.valid) {
